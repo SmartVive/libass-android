@@ -166,9 +166,33 @@ static JNINativeMethod trackMethodTable[] = {
         {"nativeAssTrackDeinit", "(J)V", (void*)nativeAssTrackDeinit}
 };
 
-jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass) {
+jlong nativeAssRenderInit(JNIEnv* env, jclass clazz, jlong ass, jstring fontPath, jstring fontName) {
     ASS_Renderer *assRenderer = ass_renderer_init((ASS_Library *) ass);
-    ass_set_fonts(assRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_FONTCONFIG, NULL, 1);
+
+    const char* cFontPath = NULL;
+    const char* cFontName = NULL;
+
+    if (fontPath != NULL) {
+        cFontPath = (*env)->GetStringUTFChars(env, fontPath, NULL);
+    }
+
+    if (fontName != NULL) {
+        cFontName = (*env)->GetStringUTFChars(env, fontName, NULL);
+    }
+
+    if (cFontPath != NULL && cFontName != NULL) {
+        ass_set_fonts(assRenderer, cFontPath, cFontName, ASS_FONTPROVIDER_NONE, NULL, 1);
+    } else {
+        ass_set_fonts(assRenderer, NULL, "sans-serif", ASS_FONTPROVIDER_FONTCONFIG, NULL, 1);
+    }
+
+    if (fontPath != NULL && cFontPath != NULL) {
+        (*env)->ReleaseStringUTFChars(env, fontPath, cFontPath);
+    }
+    if (fontName != NULL && cFontName != NULL) {
+        (*env)->ReleaseStringUTFChars(env, fontName, cFontName);
+    }
+
     return (jlong) assRenderer;
 }
 
@@ -324,7 +348,7 @@ void nativeAssRenderDeinit(JNIEnv* env, jclass clazz, jlong render) {
 }
 
 static JNINativeMethod renderMethodTable[] = {
-        {"nativeAssRenderInit", "(J)J", (void*)nativeAssRenderInit},
+        {"nativeAssRenderInit", "(JLjava/lang/String;Ljava/lang/String;)J", (void*)nativeAssRenderInit},
         {"nativeAssRenderSetFontScale", "(JF)V", (void*)nativeAssRenderSetFontScale},
         {"nativeAssRenderSetCacheLimit", "(JII)V", (void*)nativeAssRenderSetCacheLimit},
         {"nativeAssRenderSetStorageSize", "(JII)V", (void*) nativeAssRenderSetStorageSize},

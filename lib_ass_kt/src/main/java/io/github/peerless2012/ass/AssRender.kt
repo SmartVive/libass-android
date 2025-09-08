@@ -7,12 +7,12 @@ package io.github.peerless2012.ass
  * @Version V1.0
  * @Description
  */
-class AssRender(nativeAss: Long) {
+class AssRender(nativeAss: Long, fontPath: String? = null, fontName: String? = null) {
 
     companion object {
 
         @JvmStatic
-        external fun nativeAssRenderInit(ass: Long): Long
+        external fun nativeAssRenderInit(ass: Long, fontPath: String?, fontName: String?): Long
 
         @JvmStatic
         external fun nativeAssRenderSetFontScale(render: Long, scale: Float)
@@ -33,7 +33,7 @@ class AssRender(nativeAss: Long) {
         external fun nativeAssRenderDeinit(render: Long)
     }
 
-    private val nativeRender: Long = nativeAssRenderInit(nativeAss)
+    private val nativeRender: Long = nativeAssRenderInit(nativeAss, fontPath, fontName)
 
     private var track: AssTrack? = null
 
